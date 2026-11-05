@@ -178,7 +178,7 @@ function setState(patch) {
 function allSubs(r) { return { ...(subs[r] || {}) }; }
 function lobbyNames() { return new Map(Object.entries(players).map(([id, p]) => [id, p.name])); }
 function startRound(n) { setState({ round: n, phase: "open", endsAt: Date.now() + ROUNDS[n - 1].time * 1000 }); }
-let autoClosed = -1;
+let autoClosed = -1, allInSince = 0;
 function tick() {
   if (state.phase === "grading") {
     const sec = Math.floor((Date.now() - (state.gradeStart || gradeStart || Date.now())) / 1000);
@@ -190,7 +190,12 @@ function tick() {
   const left = Math.max(0, Math.ceil((state.endsAt - Date.now()) / 1000));
   const el = $("#tleft"); if (el) el.textContent = left;
   const arc = $("#arc"); if (arc) arc.style.strokeDashoffset = String(880 * (1 - left / ROUNDS[state.round - 1].time));
-  if (left === 0 && autoClosed !== state.round) { autoClosed = state.round; lockAndGrade(); }
+  // auto-lock: when time runs out, or ~2s after every player in the room has submitted
+  const ids = Object.keys(players), got = allSubs(state.round);
+  const allIn = ids.length > 0 && ids.every(id => got[id] && got[id].prompt && got[id].prompt.trim());
+  if (!allIn) allInSince = 0; else if (!allInSince) allInSince = Date.now();
+  const sc = $("#subcnt"); if (sc && allIn) sc.closest(".counter").innerHTML = `✓ Đủ bài! Claude chấm ngay…`;
+  if ((left === 0 || (allIn && Date.now() - allInSince >= 2000)) && autoClosed !== state.endsAt) { autoClosed = state.endsAt; allInSince = 0; lockAndGrade(); }
 }
 
 /* ---- grading ---- */
