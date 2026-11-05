@@ -12,7 +12,7 @@ const ROUNDS = [
   { skill: "Kiểm chứng — bắt lỗi AI", title: "🕵️ AI chém gió", time: 75,
     task: "AI vừa “chém gió” về trường mình. Tìm 3 chỗ AI nói sai và sửa lại cho đúng!",
     ctxLabel: "AI trả lời câu hỏi “Kể về trường NEU đi”",
-    ctx: "Trường Đại học Kinh tế Quốc dân (NEU) nằm ở TP. Hồ Chí Minh và được thành lập năm 2020. Trường nằm trên phố Giải Phóng. Sinh viên NEU học theo tháng, mà mỗi tháng luôn có đúng 4 tuần.",
+    ctx: "Trường Đại học Kinh tế Quốc dân (NEU) nằm ở TP. Hồ Chí Minh và được thành lập năm 2020. Trường nằm trên phố Giải Phóng. Ngoài ra, một năm có 12 tháng và tháng nào cũng có đúng 4 tuần.",
     ph: "Sai 1: … → đúng là: …\nSai 2: …\nSai 3: …", hint: "Mẹo: có 1 câu ĐÚNG để bẫy bạn đấy!",
     crit: [{ k: "phat_hien", label: "Tìm đúng lỗi", max: 60 }, { k: "sua_dung", label: "Sửa đúng", max: 30 }, { k: "ro_rang", label: "Rõ ràng", max: 10 }],
     guide: "Chấm một CÂU TRẢ LỜI bắt lỗi (không phải prompt). Đáp án 3 lỗi: (1) NEU ở TP. Hồ Chí Minh → thực tế ở HÀ NỘI; (2) thành lập năm 2020 → thực tế năm 1956; (3) mỗi tháng luôn đúng 4 tuần → sai, tháng có 28–31 ngày, tức hơn 4 tuần (trừ tháng 2 năm thường). Câu “Trường nằm trên phố Giải Phóng” là ĐÚNG (207 Giải Phóng) — ai đánh dấu câu này là lỗi thì trừ 10 điểm phat_hien. phat_hien: 20 điểm/lỗi tìm đúng. sua_dung: 10 điểm/lỗi sửa đúng (năm thành lập chấp nhận 1956; lỗi tuần chỉ cần nói tháng có 28–31 ngày/không phải lúc nào cũng 4 tuần). ro_rang: trình bày gọn, dễ đọc.",
@@ -46,7 +46,7 @@ const ROUNDS = [
 ];
 const critOf = r => (ROUNDS[r - 1] || ROUNDS[0]).crit;
 const MAXLEN = 700;
-const APP_VER = "14";
+const APP_VER = "15";
 
 /* ---------- helpers ---------- */
 const $ = s => document.querySelector(s);
@@ -70,7 +70,7 @@ let state = { round: 0, phase: "lobby" };
 let screenKey = "";
 
 /* ================= HOST ================= */
-let code, players, subs, results, board, bots;
+let code, players, subs, drafts, results, board, bots;
 let pendingReq = null, gradeStart = 0, judgeInfo = null;
 function hostLoad() {
   code = (params.get("host") || "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 12);
@@ -79,6 +79,7 @@ function hostLoad() {
   state = saved.state || { round: 0, phase: "lobby" };
   players = saved.players || {};
   subs = saved.subs || {};
+  drafts = saved.drafts || {};
   results = saved.results || null;
   board = saved.board || {};
   bots = {};
@@ -86,7 +87,7 @@ function hostLoad() {
   if (!state.sid) state.sid = rid(6);
   return true;
 }
-function hostSave() { ls.set("pb_host_" + code, JSON.stringify({ state, players, subs, results, board, bots, pendingReq })); }
+function hostSave() { ls.set("pb_host_" + code, JSON.stringify({ state, players, subs, drafts, results, board, bots, pendingReq })); }
 const T = (...p) => [NS, code || GAME, ...p].join("/");
 const joinUrl = () => location.origin + location.pathname + "?g=" + code;
 
@@ -114,13 +115,13 @@ async function claimRoom(recovery) {
 function becomeOwner() {
   if (hostMode === "owner") return;
   hostMode = "owner"; screenKey = "";
-  client.subscribe([T("join", "+"), T("sub", "+"), T("judge"), T("grades")], { qos: 1 });
+  client.subscribe([T("join", "+"), T("sub", "+"), T("draft", "+"), T("judge"), T("grades")], { qos: 1 });
   publishState();
   render();
 }
 function lockHost() {
   if (hostMode === "locked") return;
-  if (hostMode === "owner") client.unsubscribe([T("join", "+"), T("sub", "+")]);
+  if (hostMode === "owner") client.unsubscribe([T("join", "+"), T("sub", "+"), T("draft", "+")]);
   hostMode = "locked"; screenKey = ""; render();
 }
 async function onOwner(m) {
@@ -144,7 +145,7 @@ function hostConnect() {
       // wait for the retained owner message; if none arrives, this device claims the room
       ownerTimer = setTimeout(() => { if (hostMode === "checking" && !ownerInfo) claimRoom(); }, 3000);
     } else if (hostMode === "owner") {
-      client.subscribe([T("join", "+"), T("sub", "+"), T("judge"), T("grades")], { qos: 1 });
+      client.subscribe([T("join", "+"), T("sub", "+"), T("draft", "+"), T("judge"), T("grades")], { qos: 1 });
       publishState();
     }
     render(true);
@@ -170,6 +171,15 @@ function hostConnect() {
       if (r !== state.round || state.phase !== "open" || !prompt.trim()) return;
       subs[r] = subs[r] || {}; subs[r][id] = { name, prompt, at: Date.now() };
       hostSave(); render(true);
+    } else if (kind === "draft") {
+      // unsent text, synced while typing — collected automatically when time runs out
+      const r = m.r | 0; const prompt = clean(m.prompt).slice(0, MAXLEN);
+      const name = clean(m.name).trim().slice(0, 24) || players[id]?.name || "Ẩn danh";
+      if (!players[id]) { players[id] = { name }; render(true); }
+      if (r !== state.round || state.phase !== "open") return;
+      drafts[r] = drafts[r] || {};
+      if (prompt.trim()) drafts[r][id] = { name, prompt, at: Date.now() }; else delete drafts[r][id];
+      draftDirty = true;
     }
   });
 }
@@ -179,7 +189,7 @@ function setState(patch) {
 function allSubs(r) { return { ...(subs[r] || {}) }; }
 function lobbyNames() { return new Map(Object.entries(players).map(([id, p]) => [id, p.name])); }
 function startRound(n) { setState({ round: n, phase: "open", endsAt: Date.now() + ROUNDS[n - 1].time * 1000 }); }
-let autoClosed = -1, allInSince = 0;
+let autoClosed = -1, allInSince = 0, collectSince = 0, draftDirty = false, draftSaved = 0;
 function tick() {
   if (state.phase === "grading") {
     const sec = Math.floor((Date.now() - (state.gradeStart || gradeStart || Date.now())) / 1000);
@@ -196,11 +206,26 @@ function tick() {
   const allIn = ids.length > 0 && ids.every(id => got[id] && got[id].prompt && got[id].prompt.trim());
   if (!allIn) allInSince = 0; else if (!allInSince) allInSince = Date.now();
   const sc = $("#subcnt"); if (sc && allIn) sc.closest(".counter").innerHTML = `✓ Đủ bài! Claude chấm ngay…`;
-  if ((left === 0 || (allIn && Date.now() - allInSince >= 2000)) && autoClosed !== state.endsAt) { autoClosed = state.endsAt; allInSince = 0; lockAndGrade(); }
+  if (draftDirty && Date.now() - draftSaved > 3000) { draftDirty = false; draftSaved = Date.now(); hostSave(); }
+  if (autoClosed === state.endsAt) return;
+  if (allIn && Date.now() - allInSince >= 2000) { autoClosed = state.endsAt; allInSince = 0; lockAndGrade(); return; }
+  if (left === 0) {
+    // time is up: give phones ~3s to push their last unsent text, then grade everyone
+    if (!collectSince) {
+      collectSince = Date.now();
+      const c = $(".counter"); if (c) c.innerHTML = `⏳ Hết giờ! Đang thu bài của tất cả mọi người…`;
+    } else if (Date.now() - collectSince >= 3000) { collectSince = 0; autoClosed = state.endsAt; lockAndGrade(); }
+  } else collectSince = 0;
 }
 
 /* ---- grading ---- */
-function entriesFor(r) { return Object.entries(allSubs(r)).filter(([, s]) => s.prompt && s.prompt.trim()); }
+// everything to grade: submitted answers + unsent drafts (the newer of the two per player)
+function entriesFor(r) {
+  const out = { ...(drafts[r] || {}) };
+  for (const [id, s] of Object.entries(subs[r] || {})) if (!out[id] || (s.at || 0) >= (out[id].at || 0)) out[id] = s;
+  return Object.entries(out).filter(([, s]) => s.prompt && s.prompt.trim());
+}
+function finalsCount(r) { return Object.values(subs[r] || {}).filter(s => s.prompt && s.prompt.trim()).length; }
 function claudePrompt() {
   const r = state.round, rd = ROUNDS[r - 1];
   const list = entriesFor(r).map(([id, s]) => ({ id, bai: s.prompt }));
@@ -312,9 +337,10 @@ function openClaudeModal() {
 }
 async function resetGame(skipConfirm) {
   if (!skipConfirm && !(await confirmBox("Kết thúc và reset phòng?\nToàn bộ người chơi và điểm sẽ bị xoá. Mọi người quét QR / bấm vào phòng lại để chơi ván mới."))) return;
-  const ids = new Set([...Object.keys(players), ...Object.keys(board), ...Object.values(subs).flatMap(o => Object.keys(o || {}))]);
-  for (const id of ids) { pub(T("join", id), null, true); pub(T("sub", id), null, true); pub(T("res", id), null, true); }
-  players = {}; subs = {}; results = null; board = {}; pendingReq = null; hostSave();
+  const ids = new Set([...Object.keys(players), ...Object.keys(board), ...Object.values(subs).flatMap(o => Object.keys(o || {})), ...Object.values(drafts).flatMap(o => Object.keys(o || {}))]);
+  for (const id of ids) { pub(T("join", id), null, true); pub(T("sub", id), null, true); pub(T("draft", id), null, true); pub(T("res", id), null, true); }
+  pub(T("gradereq"), null, true); pub(T("grades"), null, true);   // no stale grading jobs in the new game
+  players = {}; subs = {}; drafts = {}; results = null; board = {}; pendingReq = null; hostSave();
   setState({ round: 0, phase: "lobby", endsAt: null, sid: rid(6) });
 }
 
@@ -356,9 +382,18 @@ function playerConnect() {
     else if (topic === T("res", pid)) { myRes = m; render(); }
   });
 }
+let draftTimer = 0, flushedAt = 0;
+function pushDraft() {
+  if (state.phase !== "open" || !me.joined) return;
+  const text = clean(me.draft || "").slice(0, MAXLEN);
+  if (me.sentRound === state.round && !me.editing) return;           // already submitted, nothing new
+  pub(T("draft", pid), { r: state.round, name: me.name, prompt: text, sid: state.sid }, true);
+  if (text.trim()) me.autoRound = state.round;
+}
 function tickPlayer() {
   if (state.phase !== "open") return;
   const left = Math.max(0, Math.ceil((state.endsAt - Date.now()) / 1000));
+  if (left <= 1 && flushedAt !== state.endsAt) { flushedAt = state.endsAt; clearTimeout(draftTimer); pushDraft(); }
   const el = $("#ptl"); if (el) el.textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
 }
 
@@ -399,7 +434,7 @@ function renderHost() {
   syncTiles(names, state.phase === "lobby" ? null : new Set(Object.keys(allSubs(state.round))));
   document.querySelectorAll(".cnt").forEach(el => el.textContent = names.size);
   const sb = $("#startbtn"); if (sb) sb.disabled = names.size === 0;
-  const sc = $("#subcnt"); if (sc) sc.textContent = entriesFor(state.round).length;
+  const sc = $("#subcnt"); if (sc) sc.textContent = finalsCount(state.round);
   const cp = $("#conn"); if (cp) cp.outerHTML = `<span id="conn">${connPill()}</span>`;
   const jp = $("#jp"); if (jp) jp.innerHTML = judgePill();
 }
@@ -573,7 +608,7 @@ function renderPlayer() {
     body = `<div class="center" style="display:flex;flex-direction:column;gap:18px">
       <div class="crew" style="justify-content:center">${state.phase === "grading" ? crew(100, "grading") : mascot("turtle", { size: 140, cls: "walk" })}</div>
       <div class="ph">${state.phase === "grading" ? 'Claude đang <span class="serif">chấm</span>…' : 'Đã <span class="serif">khoá bài</span>'}</div>
-      <div class="pp">${me.sentRound === r ? "Bài của bạn đã được ghi nhận." : "Vòng này bạn chưa nộp bài."}</div></div>`;
+      <div class="pp">${me.sentRound === r ? "Bài của bạn đã được ghi nhận." : me.autoRound === r ? "Hết giờ — bài đang viết dở của bạn đã được tự động thu để chấm." : "Vòng này bạn chưa viết gì."}</div></div>`;
   } else if (screen === "res") {
     if (!myRes || myRes.round !== r) body = `<div class="ph">Vòng ${r} <span class="serif">kết thúc</span></div><div class="pp">Bạn không có bài ở vòng này. Chuẩn bị cho vòng sau nhé!</div>`;
     else { const tm = tierMascot(myRes.score, 130); body = `<div class="center" style="display:flex;flex-direction:column;align-items:center;gap:4px">${myRes.rank <= 3 && myRes.score >= 40 ? placeMascot(myRes.rank - 1, 130) : tm.svg}<div class="tiermsg">${myRes.rank <= 3 && myRes.score >= 40 ? ["Top 1 vòng này — Capybara Vàng!", "Top 2 — Heo Bạc ủn ỉn chúc mừng!", "Top 3 — Rùa Đồng chậm mà chắc!"][myRes.rank - 1] : tm.msg}</div></div><div class="scard">
@@ -609,8 +644,9 @@ function wirePlayer(screen) {
   if (screen === "write") {
     const ta = $("#pr"); ta.value = me.draft || me.sent || "";
     const upd = () => { me.draft = ta.value; $("#cc").textContent = `${ta.value.length}/${MAXLEN}`; $("#send").disabled = ta.value.trim().length < 5; };
-    ta.oninput = upd; upd();
+    ta.oninput = () => { upd(); clearTimeout(draftTimer); draftTimer = setTimeout(pushDraft, 1200); }; upd();
     $("#send").onclick = () => {
+      clearTimeout(draftTimer);
       me.sent = clean(ta.value).slice(0, MAXLEN); me.sentRound = state.round; me.editing = false;
       pub(T("sub", pid), { r: state.round, name: me.name, prompt: me.sent, sid: state.sid }, true); render();
     };
