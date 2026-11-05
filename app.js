@@ -46,6 +46,7 @@ const ROUNDS = [
 ];
 const critOf = r => (ROUNDS[r - 1] || ROUNDS[0]).crit;
 const MAXLEN = 700;
+const APP_VER = "14";
 
 /* ---------- helpers ---------- */
 const $ = s => document.querySelector(s);
@@ -172,7 +173,7 @@ function hostConnect() {
     }
   });
 }
-function publishState() { if (hostMode === "owner") pub(T("state"), { ...state, sentAt: Date.now() }, true); }
+function publishState() { if (hostMode === "owner") pub(T("state"), { ...state, ver: APP_VER, sentAt: Date.now() }, true); }
 function setState(patch) {
   if (hostMode !== "owner") return; state = { ...state, ...patch }; hostSave(); publishState(); render(); }
 function allSubs(r) { return { ...(subs[r] || {}) }; }
@@ -326,6 +327,11 @@ function joinNow() {
   me.joined = true; me.sid = state.sid; ls.set(sidKey(), state.sid);
 }
 function onPlayerState(m) {
+  // host runs a newer build → reload this phone once, with a cache-busting URL
+  if (m && m.ver && m.ver !== APP_VER) {
+    let tried = null; try { tried = sessionStorage.getItem("pb_ver_try"); } catch (e) { }
+    if (tried !== m.ver) { try { sessionStorage.setItem("pb_ver_try", m.ver); } catch (e) { } location.replace(location.pathname + "?g=" + GAME + "&v=" + m.ver); return; }
+  }
   const newSession = m.sid && m.sid !== me.sid;
   state = m;
   if (newSession) {
