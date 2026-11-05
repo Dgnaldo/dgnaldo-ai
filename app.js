@@ -18,15 +18,6 @@ const ROUNDS = [
     guide: "Chấm một CÂU TRẢ LỜI bắt lỗi (không phải prompt). Đáp án 3 lỗi: (1) NEU ở TP. Hồ Chí Minh → thực tế ở HÀ NỘI; (2) thành lập năm 2020 → thực tế năm 1956; (3) mỗi tháng luôn đúng 4 tuần → sai, tháng có 28–31 ngày, tức hơn 4 tuần (trừ tháng 2 năm thường). Câu “Trường nằm trên phố Giải Phóng” là ĐÚNG (207 Giải Phóng) — ai đánh dấu câu này là lỗi thì trừ 10 điểm phat_hien. phat_hien: 20 điểm/lỗi tìm đúng. sua_dung: 10 điểm/lỗi sửa đúng (năm thành lập chấp nhận 1956; lỗi tuần chỉ cần nói tháng có 28–31 ngày/không phải lúc nào cũng 4 tuần). ro_rang: trình bày gọn, dễ đọc.",
     kw: ["hà nội", "1956", "28", "30", "31", "ngày", "hồ chí minh", "2020", "4 tuần", "sai", "sửa"],
     lesson: "AI có thể “chém gió”: nói sai rất tự tin, kể cả những điều tưởng hiển nhiên. Luôn kiểm tra lại tên, năm, con số với nguồn tin cậy (website chính thức, giáo trình) trước khi dùng." },
-  { skill: "Hỏi tiếp để AI trả lời tốt hơn", title: "🤖 AI nói như robot", time: 75,
-    task: "Câu trả lời của AI đúng nhưng nhạt như nước ốc. Viết MỘT câu hỏi tiếp để AI cho lời khuyên thật sự hợp với bạn!",
-    ctxLabel: "Bạn hỏi “Làm sao để dậy sớm?”, AI đáp:",
-    ctx: "Hãy đi ngủ sớm và đặt báo thức.",
-    ph: "Câu hỏi tiếp của bạn…", hint: "Mẹo: kể hoàn cảnh của bạn, xin kế hoạch cụ thể, mẹo thực tế",
-    crit: [{ k: "cu_the", label: "Cụ thể", max: 40 }, { k: "dung_diem_yeu", label: "Đúng điểm yếu", max: 30 }, { k: "ca_nhan", label: "Gắn với bạn", max: 30 }],
-    guide: "Chấm MỘT câu hỏi tiếp (follow-up) gửi cho AI. Điểm yếu của câu trả lời gốc: quá chung chung, không có kế hoạch, không tính đến thói quen/khó khăn của người hỏi. cu_the: yêu cầu cụ thể (kế hoạch theo giờ, 7 ngày, mẹo khi buồn ngủ, số bước). dung_diem_yeu: nhắm đúng chỗ thiếu (tại sao không dậy được, làm gì khi tắt báo thức rồi ngủ tiếp…). ca_nhan: nêu hoàn cảnh riêng (thức khuya lướt điện thoại, học sáng 7h, ở trọ, chơi game…). Nếu chỉ hỏi lại y câu cũ thì điểm rất thấp.",
-    kw: ["mình", "tôi", "hay thức", "điện thoại", "giờ", "kế hoạch", "cụ thể", "ví dụ", "tại sao", "7h", "mẹo"],
-    lesson: "Câu trả lời đầu tiên của AI thường chung chung. Hãy hỏi tiếp và kể hoàn cảnh của bạn: “mình hay thức đến 2h vì lướt điện thoại, lập kế hoạch 7 ngày giúp mình…” — AI sẽ trả lời đúng cho BẠN." },
   { skill: "Dùng AI làm gia sư", title: "🎯 Đố vui cùng AI", time: 75,
     task: "Sắp thi tiếng Anh! Viết prompt để AI đố bạn từ vựng: mỗi lần một câu, chờ bạn trả lời, KHÔNG lộ đáp án trước.",
     ph: "Viết prompt biến AI thành người đố vui…", hint: "Mẹo: nói rõ chủ đề, số câu, đố từng câu, chờ trả lời",
@@ -46,7 +37,14 @@ const ROUNDS = [
 ];
 const critOf = r => (ROUNDS[r - 1] || ROUNDS[0]).crit;
 const MAXLEN = 700;
-const APP_VER = "15";
+const ANIMALS = [["capy", "Capybara"], ["🐷", "Heo"], ["🐢", "Rùa"], ["🐶", "Cún"], ["🐱", "Mèo"], ["🐰", "Thỏ"], ["🦊", "Cáo"], ["🐻", "Gấu"], ["🐼", "Gấu trúc"], ["🐨", "Koala"],
+  ["🐯", "Hổ"], ["🦁", "Sư tử"], ["🐮", "Bò sữa"], ["🐸", "Ếch"], ["🐵", "Khỉ"], ["🐔", "Gà"], ["🐧", "Cánh cụt"], ["🐤", "Gà con"], ["🦆", "Vịt"], ["🦉", "Cú mèo"],
+  ["🦄", "Kỳ lân"], ["🐝", "Ong"], ["🦋", "Bướm"], ["🐞", "Bọ rùa"], ["🐙", "Bạch tuộc"], ["🦀", "Cua"], ["🐠", "Cá"], ["🐬", "Cá heo"], ["🐳", "Cá voi"], ["🦈", "Cá mập"],
+  ["🐊", "Cá sấu"], ["🦒", "Hươu cao cổ"], ["🦘", "Kangaroo"], ["🦥", "Con lười"], ["🦦", "Rái cá"], ["🦔", "Nhím"], ["🐿️", "Sóc"], ["🦩", "Hồng hạc"], ["🦜", "Vẹt"], ["🐘", "Voi"], ["🦓", "Ngựa vằn"]];
+const AVA = new Map(ANIMALS);
+const okAva = a => AVA.has(a) ? a : "🐶";
+const avaHtml = (a, size = 32, cls = "") => { a = okAva(a); return a === "capy" ? `<span class="ava ${cls}" style="width:${size}px;height:${size}px">${mascot("capy", { size, yuzu: size > 40 })}</span>` : `<span class="ava ${cls}" style="width:${size}px;height:${size}px;font-size:${Math.round(size * .8)}px">${a}</span>`; };
+const APP_VER = "16";
 
 /* ---------- helpers ---------- */
 const $ = s => document.querySelector(s);
@@ -162,8 +160,9 @@ function hostConnect() {
     if (m.sid !== state.sid) return;           // message from an older game session
     if (kind === "join") {
       const name = clean(m.name).trim().slice(0, 24); if (!name) return;
-      if (players[id]?.name === name) return;
-      players[id] = { name }; hostSave(); render(true);
+      const ava = okAva(m.ava);
+      if (players[id]?.name === name && players[id]?.ava === ava) return;
+      players[id] = { name, ava }; if (board[id]) { board[id].name = name; board[id].ava = ava; } hostSave(); render(true);
     } else if (kind === "sub") {
       const r = m.r | 0; const prompt = clean(m.prompt).slice(0, MAXLEN);
       const name = clean(m.name).trim().slice(0, 24) || players[id]?.name || "Ẩn danh";
@@ -187,7 +186,7 @@ function publishState() { if (hostMode === "owner") pub(T("state"), { ...state, 
 function setState(patch) {
   if (hostMode !== "owner") return; state = { ...state, ...patch }; hostSave(); publishState(); render(); }
 function allSubs(r) { return { ...(subs[r] || {}) }; }
-function lobbyNames() { return new Map(Object.entries(players).map(([id, p]) => [id, p.name])); }
+function lobbyNames() { return new Map(Object.entries(players).map(([id, p]) => [id, p])); }
 function startRound(n) { setState({ round: n, phase: "open", endsAt: Date.now() + ROUNDS[n - 1].time * 1000 }); }
 let autoClosed = -1, allInSince = 0, collectSince = 0, draftDirty = false, draftSaved = 0;
 function tick() {
@@ -256,21 +255,27 @@ function applyScores(r, scored, source) {
   const entries = entriesFor(r);
   // remove this round from board before re-applying
   for (const b of Object.values(board)) if (b.rounds) delete b.rounds[r];
+  for (const b of Object.values(board)) b.total = Object.values(b.rounds || {}).reduce((a, x) => a + x, 0);
+  const prevRank = {}; if (r > 1) boardSorted().forEach((b, i) => prevRank[b.id] = i + 1);
   const items = entries.map(([id, s]) => {
     const g = scored[id] || { parts: {}, comment: "Chưa có điểm cho bài này." };
     const parts = {}; let tot = 0;
     for (const c of critOf(r)) { const v = Math.max(0, Math.min(c.max, Math.round(+g.parts[c.k] || 0))); parts[c.k] = v; tot += v; }
     board[id] = board[id] || { name: s.name, rounds: {} };
-    board[id].name = s.name; board[id].rounds[r] = tot;
-    return { id, name: s.name, prompt: s.prompt, parts, score: tot, comment: clean(g.comment).slice(0, 160) };
+    board[id].name = s.name; board[id].ava = players[id]?.ava || board[id].ava; board[id].rounds[r] = tot;
+    return { id, name: s.name, ava: board[id].ava, prompt: s.prompt, parts, score: tot, comment: clean(g.comment).slice(0, 160) };
   }).sort((a, b) => b.score - a.score);
   for (const b of Object.values(board)) b.total = Object.values(b.rounds || {}).reduce((a, x) => a + x, 0);
-  results = { round: r, items, source, at: Date.now() };
+  results = { round: r, items, source, prevRank, at: Date.now() };
   pendingReq = null;
   hostSave();
   publishResults();
   setState({ phase: "results" });
   burst(120);
+}
+function showBoard() {
+  const top = boardSorted().slice(0, 5).map(b => ({ name: b.name, ava: b.ava, total: b.total }));
+  setState({ phase: "board", top });
 }
 function boardSorted() { return Object.entries(board).map(([id, b]) => ({ id, ...b })).sort((a, b) => b.total - a.total); }
 function publishResults() {
@@ -279,7 +284,7 @@ function publishResults() {
   results.items.forEach((it, i) => {
     if (bots[it.id]) return;
     pub(T("res", it.id), { round: results.round, rank: i + 1, of: results.items.length, score: it.score, parts: it.parts, comment: it.comment,
-      total: board[it.id]?.total ?? it.score, overall: fb.findIndex(b => b.id === it.id) + 1, players: fb.length }, true);
+      total: board[it.id]?.total ?? it.score, overall: fb.findIndex(b => b.id === it.id) + 1, prev: results.prevRank?.[it.id] || 0, players: fb.length }, true);
   });
 }
 function judgeOnline() { return !!(judgeInfo && judgeInfo.online && Date.now() - (judgeInfo.at || 0) < 90000); }
@@ -345,11 +350,11 @@ async function resetGame(skipConfirm) {
 }
 
 /* ================= PLAYER ================= */
-const me = { name: ls.get("pb_name") || "", joined: false, sid: null, draft: "", sent: "", sentRound: 0, editing: false };
+const me = { name: ls.get("pb_name") || "", ava: AVA.has(ls.get("pb_ava")) ? ls.get("pb_ava") : ANIMALS[Math.floor(Math.random() * ANIMALS.length)][0], joined: false, sid: null, draft: "", sent: "", sentRound: 0, editing: false };
 const sidKey = () => "pb_sid_" + GAME;
 function joinNow() {
   if (!connected || !state.sid || !me.name) return;
-  pub(T("join", pid), { name: me.name, sid: state.sid }, true);
+  pub(T("join", pid), { name: me.name, ava: me.ava, sid: state.sid }, true);
   me.joined = true; me.sid = state.sid; ls.set(sidKey(), state.sid);
 }
 function onPlayerState(m) {
@@ -446,8 +451,8 @@ function syncTiles(names, done) {
   for (const [id, n] of names) {
     let el = have.get(id);
     if (!el) { el = document.createElement("span"); el.className = "tile"; el.dataset.id = id; box.appendChild(el); }
-    const ok = !!(done && done.has(id)); const t = (ok ? "✓ " : "") + n;
-    if (el.textContent !== t) el.textContent = t;
+    const ok = !!(done && done.has(id)); const sig = (ok ? "1" : "0") + (n.ava || "") + n.name;
+    if (el.dataset.sig !== sig) { el.dataset.sig = sig; el.innerHTML = `${avaHtml(n.ava, 26)}<span>${ok ? "✓ " : ""}${esc(n.name)}</span>`; }
     el.classList.toggle("done", ok);
     have.delete(id);
   }
@@ -466,7 +471,7 @@ function buildHost() {
         <div class="lbl">Mã phòng</div><div class="roomcode">${esc(code.toUpperCase())}</div></div>
       <div class="lobbyside">
         <div class="h1" style="font-size:clamp(48px,5.5vw,84px)">Dgnaldo <span class="serif">AI</span></div>
-        <p class="lead" style="margin-top:10px">5 vòng · 5 kỹ năng AI · Claude chấm điểm</p>
+        <p class="lead" style="margin-top:10px">${ROUNDS.length} vòng · ${ROUNDS.length} kỹ năng AI · Claude chấm điểm</p>
         <div class="crew">${crew(130)}</div>
         <div class="pcount"><b class="cnt">0</b><span>người chơi</span></div>
         <div class="tiles" id="chips"></div>
@@ -506,19 +511,31 @@ function buildHost() {
         <h3 style="margin-top:18px">Tiêu chí chấm</h3>
         <div class="legend">${rd.crit.map(c => `<div><b>${c.label}</b> /${c.max}</div>`).join("")}</div>
         <div class="controls" style="margin-top:20px">
-          ${last ? `<button class="btn acc" onclick="setState({phase:'final'})">🏆 Công bố chung cuộc</button>` : `<button class="btn acc" onclick="startRound(${r + 1})">Vòng ${r + 1} →</button>`}
+          <button class="btn acc" onclick="showBoard()">📊 Bảng xếp hạng →</button>
           ${items.length ? `<button class="btn ghost sm" id="cptop">⧉ Copy bài Top 1</button>` : ""}
         </div>
         <div class="runbox"><span class="q">Bấm vào một dòng để xem bài đầy đủ làm mẫu cho cả lớp.</span></div>
         <div class="controls"><button class="btn ghost sm" onclick="setState({phase:'closed'})">↺ Chấm lại vòng này</button></div></div></div>`;
+  } else if (state.phase === "board") {
+    const fb = boardSorted(), last = r >= ROUNDS.length, prev = results?.prevRank || {};
+    const rs = Object.fromEntries((results?.items || []).map(it => [it.id, it.score]));
+    const row = (p, i) => {
+      const was = prev[p.id], mv = !was ? `<span class="mv new">mới</span>` : was > i + 1 ? `<span class="mv up">▲${was - i - 1}</span>` : was < i + 1 ? `<span class="mv down">▼${i + 1 - was}</span>` : `<span class="mv same">–</span>`;
+      return `<div class="lb p${i + 1}" style="animation-delay:${Math.min(i, 20) * .05}s"><b class="lbpos">${i + 1}</b>${r > 1 ? mv : ""}${avaHtml(p.ava, 36)}<span class="lbnm">${esc(p.name)}</span>${rs[p.id] != null ? `<span class="lbplus">+${rs[p.id]}</span>` : ""}<b class="lbtot">${p.total}</b></div>`;
+    };
+    body = `<div class="boardv"><div class="rlabel">Bảng xếp hạng sau vòng ${r}/${ROUNDS.length}</div>
+      <div class="h1" style="font-size:56px;margin:6px 0 18px">Ai đang <span class="serif">dẫn đầu?</span></div>
+      <div class="lbgrid ${fb.length > 10 ? "two" : ""}">${fb.map(row).join("") || `<div class="pp">Chưa có điểm.</div>`}</div>
+      <div class="controls" style="justify-content:center">${last ? `<button class="btn acc big" onclick="setState({phase:'final'})">🏆 Công bố chung cuộc</button>` : `<button class="btn acc big" onclick="startRound(${r + 1})">Vòng ${r + 1} →</button>`}
+        <button class="btn ghost sm" onclick="setState({phase:'results'})">← Xem lại kết quả vòng</button></div></div>`;
   } else if (state.phase === "final") {
     const fb = boardSorted(); const [g, s, b] = fb;
-    const pod = (p, cls, n) => p ? `<div class="pod ${cls}">${placeMascot(n - 1, n === 1 ? 170 : 140)}<div class="title">${PLACE[n - 1].name}</div><div class="who">${esc(p.name)}</div><div class="pts">${p.total} điểm</div><div class="blk">${n}</div></div>` : `<div class="pod ${cls}" style="visibility:hidden"></div>`;
+    const pod = (p, cls, n) => p ? `<div class="pod ${cls}">${placeMascot(n - 1, n === 1 ? 170 : 140)}<div class="title">${PLACE[n - 1].name}</div><div class="who">${avaHtml(p.ava, 34)} ${esc(p.name)}</div><div class="pts">${p.total} điểm</div><div class="blk">${n}</div></div>` : `<div class="pod ${cls}" style="visibility:hidden"></div>`;
     body = `<div style="text-align:center"><div class="rlabel">Chung cuộc</div>
       <div class="h1" style="font-size:64px;margin-top:6px">Dgnaldo <span class="serif">Champions</span></div>
       <div class="podium">${pod(s, "s", 2)}${pod(g, "g", 1)}${pod(b, "b", 3)}</div>
       <div class="skills">${ROUNDS.map((x, i) => `<span>✓ ${i + 1}. ${esc(x.skill)}</span>`).join("")}</div>
-      <div class="chips" style="justify-content:center">${fb.slice(3).map((p, i) => `<span class="chip">#${i + 4} ${esc(p.name)} · ${p.total}</span>`).join("")}</div>
+      <div class="chips" style="justify-content:center">${fb.slice(3).map((p, i) => `<span class="chip">#${i + 4} ${avaHtml(p.ava, 22)} ${esc(p.name)} · ${p.total}</span>`).join("")}</div>
       <div class="controls" style="justify-content:center"><button class="btn" onclick="resetGame()">✓ Kết thúc & reset phòng</button></div></div>`;
     setTimeout(() => burst(260), 2200);
   }
@@ -534,7 +551,7 @@ function rowHtml(it, i, n) {
   const bars = critOf(results.round).map(c => `<i style="--w:${Math.round(100 * (it.parts?.[c.k] || 0) / c.max)}%" title="${c.label}"></i>`).join("");
   const delay = Math.max(0, Math.min(n, 8) - i) * 0.12;
   return `<div class="row p${i + 1}" data-i="${i}" style="animation-delay:${delay}s"><div class="pos">${i < 3 && it.score >= 40 ? placeMascot(i, 60, { sparks: false, crown: false }) : i + 1}</div>
-    <div><div class="nm">${esc(it.name)}</div><div class="cm">${esc(it.comment)}</div><div class="bars">${bars}</div></div><div class="sc">${it.score}</div></div>`;
+    <div><div class="nm">${avaHtml(it.ava, 28)} ${esc(it.name)}</div><div class="cm">${esc(it.comment)}</div><div class="bars">${bars}</div></div><div class="sc">${it.score}</div></div>`;
 }
 function showPrompt(i) {
   const it = results.items[+i]; if (!it) return;
@@ -574,6 +591,7 @@ function renderPlayer() {
   else if (state.phase === "open") screen = (me.sentRound === r && !me.editing) ? "sent" : "write";
   else if (state.phase === "closed" || state.phase === "grading") screen = "wait";
   else if (state.phase === "results") screen = "res";
+  else if (state.phase === "board") screen = "board";
   else if (state.phase === "final") screen = "final";
   else screen = "lobby";
   const key = `${screen}|${state.phase}|${state.sid}|${r}|${myRes ? myRes.round + ":" + myRes.score + ":" + myRes.total : 0}|${connected}`;
@@ -581,17 +599,18 @@ function renderPlayer() {
   const rd = ROUNDS[r - 1];
   let body = "";
   if (screen === "name") {
-    body = `<div class="crew" style="margin:0">${crew(92)}</div>
-      <div class="ph">Dgnaldo <span class="serif">AI</span></div>
-      <div class="pp">Nhập tên hiển thị của bạn trên màn hình lớn.</div>
+    body = `<div class="ph">Dgnaldo <span class="serif">AI</span></div>
+      <div class="pp">Chọn con vật đại diện và nhập tên hiển thị trên màn hình lớn.</div>
+      <div class="avapick"><div class="avabig" id="avabig">${avaHtml(me.ava, 84, "bob")}</div><div><b id="avaname">${esc(AVA.get(me.ava))}</b><div class="pp" style="font-size:13px">Chạm để đổi con khác 👇</div></div></div>
+      <div class="avagrid">${ANIMALS.map(([k, n]) => `<button class="avb ${k === me.ava ? "on" : ""}" data-a="${esc(k)}" title="${esc(n)}">${avaHtml(k, 34)}</button>`).join("")}</div>
       <input class="txt" id="nm" maxlength="24" placeholder="Tên của bạn" autocomplete="off" value="${esc(me.name)}">
       <button class="btn acc" id="go" ${connected && state.sid ? "" : "disabled"}>${connected && state.sid ? "Vào phòng" : "Đang kết nối…"}</button>`;
   } else if (screen === "lobby") {
     body = `<div class="center" style="display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;justify-content:center">${avaHtml(me.ava, 120, "bob")}</div>
       <div class="ph">Chào <span class="serif">${esc(me.name)}</span>!</div>
-      <div class="crew" style="justify-content:center">${crew(96)}</div>
       <div class="pp">Bạn đã vào phòng. Nhìn lên màn hình — vòng thi sẽ bắt đầu ngay thôi.</div>
-      <button class="btn ghost sm" style="width:auto" id="rename">Đổi tên</button></div>`;
+      <button class="btn ghost sm" style="width:auto" id="rename">Đổi tên / con vật</button></div>`;
   } else if (screen === "write") {
     body = `<div class="prow"><span>Vòng ${r}/${ROUNDS.length} · ${esc(rd.title)}</span><span class="ptimer" id="ptl"></span></div>
       <div class="ptask">${esc(rd.task)}</div>
@@ -618,6 +637,14 @@ function renderPlayer() {
         <div class="parts">${critOf(r).map(c => `<div><b>${myRes.parts?.[c.k] ?? 0}<span style="font-size:12px;color:#6b7280">/${c.max}</span></b>${c.label}</div>`).join("")}</div></div>
       <div class="pp center">Tổng điểm: <b style="color:var(--cream)">${myRes.total}</b> · Hạng chung #${myRes.overall}/${myRes.players}</div>`; }
     body += `<div class="lesson p">${mascot("capy", { size: 52, glasses: true, cls: "think" })}<div><div class="lt">💡 Bài học · ${esc(rd.skill)}</div>${esc(rd.lesson)}</div></div>`;
+  } else if (screen === "board") {
+    const ov = myRes && myRes.round === r ? myRes : null;
+    const mv = ov && ov.prev ? (ov.prev > ov.overall ? `<span class="mv up">▲${ov.prev - ov.overall}</span>` : ov.prev < ov.overall ? `<span class="mv down">▼${ov.overall - ov.prev}</span>` : `<span class="mv same">giữ hạng</span>`) : "";
+    body = `<div class="center" style="display:flex;flex-direction:column;gap:12px;align-items:center">
+      <div class="pp">Bảng xếp hạng sau vòng ${r}/${ROUNDS.length}</div>
+      ${avaHtml(me.ava, 110, "bob")}
+      ${ov ? `<div class="big">#${ov.overall}<span style="font-size:22px;color:var(--muted)">/${ov.players}</span></div><div>${mv}</div><div class="pp">Tổng điểm: <b style="color:var(--cream)">${ov.total}</b></div>` : `<div class="pp">Bạn chưa có điểm ở vòng này.</div>`}</div>
+      <div class="lbgrid mini">${(state.top || []).map((p, i) => `<div class="lb p${i + 1}"><b class="lbpos">${i + 1}</b>${avaHtml(p.ava, 28)}<span class="lbnm">${esc(p.name)}</span><b class="lbtot">${p.total}</b></div>`).join("")}</div>`;
   } else if (screen === "final") {
     const i = myRes ? myRes.overall - 1 : -1;
     body = `<div class="center" style="display:flex;flex-direction:column;gap:14px"><div class="pp">Chung cuộc</div>
@@ -629,7 +656,7 @@ function renderPlayer() {
       <div class="lesson p" style="text-align:left"><div><div class="lt">Hôm nay bạn đã luyện</div>${ROUNDS.map((x, k) => `✓ ${k + 1}. ${esc(x.skill)}`).join("<br>")}</div></div></div>`;
     if (i >= 0 && i < 3) setTimeout(() => burst(160), 300);
   }
-  $("#app").innerHTML = `<div class="ply"><div class="top"><div class="brand"><div class="hex"></div>DGNALDO AI</div>${connPill()}</div><div class="pbody">${body}</div></div>`;
+  $("#app").innerHTML = `<div class="ply"><div class="top"><div class="brand"><div class="hex"></div>DGNALDO AI</div><div style="display:flex;gap:8px;align-items:center">${me.joined ? `<span class="pill">${avaHtml(me.ava, 20)} <b>${esc(me.name)}</b></span>` : ""}${connPill()}</div></div><div class="pbody">${body}</div></div>`;
   wirePlayer(screen); tickPlayer();
 }
 function wirePlayer(screen) {
@@ -639,6 +666,11 @@ function wirePlayer(screen) {
       me.name = v; ls.set("pb_name", v); joinNow(); render();
     };
     $("#go").onclick = go; $("#nm").onkeydown = e => { if (e.key === "Enter") go(); };
+    document.querySelectorAll(".avb").forEach(b => b.onclick = () => {
+      me.ava = okAva(b.dataset.a); ls.set("pb_ava", me.ava);
+      document.querySelectorAll(".avb").forEach(x => x.classList.toggle("on", x === b));
+      $("#avabig").innerHTML = avaHtml(me.ava, 84, "bob pop"); $("#avaname").textContent = AVA.get(me.ava);
+    });
   }
   if (screen === "lobby") $("#rename").onclick = () => { me.joined = false; render(); };
   if (screen === "write") {
