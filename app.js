@@ -2,47 +2,47 @@
 const BROKER = "wss://broker.hivemq.com:8884/mqtt";
 const NS = "neu-ep01-promptbattle";
 const ROUNDS = [
-  { skill: "Viết prompt có cấu trúc", title: "Viết prompt 4 phần", time: 75,
-    task: "Viết prompt nhờ AI chia việc cho nhóm 5 người chuẩn bị bài thuyết trình 10 phút về “Tác động của AI đến việc làm”, hạn nộp 1 tuần.",
-    ph: "Viết prompt bạn sẽ gửi cho AI…", hint: "Mẹo: Vai trò + Bối cảnh + Nhiệm vụ + Định dạng",
+  { skill: "Viết prompt có cấu trúc", title: "🍳 Cứu đói cuối tháng", time: 75,
+    task: "Tủ lạnh chỉ còn 2 quả trứng, 1 gói mì và nửa củ hành. Viết prompt nhờ AI gợi ý bữa tối cho bạn!",
+    ph: "Viết prompt bạn sẽ gửi cho AI…", hint: "Mẹo: AI là ai? Bạn có gì? Muốn gì? Trả lời kiểu gì?",
     crit: [{ k: "vai_tro", label: "Vai trò", max: 25 }, { k: "boi_canh", label: "Bối cảnh", max: 25 }, { k: "nhiem_vu", label: "Nhiệm vụ", max: 25 }, { k: "dinh_dang", label: "Định dạng", max: 25 }],
-    guide: "Chấm một PROMPT gửi cho AI. vai_tro: có giao vai cho AI (trưởng nhóm, chuyên gia…). boi_canh: nêu nhóm 5 tân sinh viên, chủ đề, 10 phút, hạn 1 tuần, điểm mạnh/yếu thành viên. nhiem_vu: yêu cầu cụ thể (chia việc, mốc thời gian, ai làm gì). dinh_dang: chỉ rõ đầu ra (bảng Tên–Việc–Hạn, gạch đầu dòng, độ dài).",
-    kw: ["bạn là", "đóng vai", "vai trò", "nhóm", "5 người", "10 phút", "1 tuần", "hạn", "chia", "bảng", "gạch đầu dòng", "từng người", "mốc"],
-    lesson: "Prompt tốt có 4 phần: Vai trò (AI là ai) · Bối cảnh (bạn là ai, tình huống gì) · Nhiệm vụ (làm chính xác việc gì) · Định dạng (trả về ra sao: bảng, gạch đầu dòng, độ dài)." },
-  { skill: "Kiểm chứng — bắt lỗi AI", title: "Bắt lỗi AI", time: 75,
-    task: "Đoạn AI trả lời dưới đây có 3 lỗi sai. Chỉ ra từng lỗi và sửa lại cho đúng.",
-    ctxLabel: "AI trả lời câu hỏi “Lạm phát là gì?”",
-    ctx: "Lạm phát là hiện tượng mức giá chung của nền kinh tế giảm liên tục trong một thời gian. Ở Việt Nam, lạm phát bình quân năm 2023 vào khoảng 15%. Để kiềm chế lạm phát, Ngân hàng Nhà nước có thể tăng lãi suất. Vì nghiên cứu tổng thể cả nền kinh tế nên lạm phát là chủ đề của Kinh tế vi mô.",
-    ph: "Lỗi 1: … → sửa: …\nLỗi 2: …\nLỗi 3: …", hint: "Mẹo: so với kiến thức trong giáo trình, số liệu GSO",
+    guide: "Chấm một PROMPT gửi cho AI. vai_tro: có giao vai cho AI (đầu bếp, chuyên gia nấu ăn sinh viên…). boi_canh: nêu đủ nguyên liệu (2 trứng, 1 gói mì, nửa củ hành), hoàn cảnh (sinh viên ở trọ, cuối tháng, ít dụng cụ, ít thời gian, khẩu vị). nhiem_vu: yêu cầu rõ (gợi ý món, cách nấu, có thể nhiều lựa chọn). dinh_dang: chỉ rõ đầu ra (các bước đánh số, thời gian nấu, ngắn gọn, số món).",
+    kw: ["bạn là", "đầu bếp", "đóng vai", "trứng", "mì", "hành", "sinh viên", "phòng trọ", "phút", "bước", "ngắn", "món"],
+    lesson: "Prompt tốt có 4 phần: Vai trò (AI là ai) · Bối cảnh (bạn có gì, hoàn cảnh ra sao) · Nhiệm vụ (muốn AI làm gì) · Định dạng (trả lời kiểu gì: từng bước, ngắn gọn, bao nhiêu món)." },
+  { skill: "Kiểm chứng — bắt lỗi AI", title: "🕵️ AI chém gió", time: 75,
+    task: "AI vừa “chém gió” về trường mình. Tìm 3 chỗ AI nói sai và sửa lại cho đúng!",
+    ctxLabel: "AI trả lời câu hỏi “Kể về trường NEU đi”",
+    ctx: "Trường Đại học Kinh tế Quốc dân (NEU) nằm ở TP. Hồ Chí Minh và được thành lập năm 2020. Trường nằm trên phố Giải Phóng. Sinh viên NEU học theo tháng, mà mỗi tháng luôn có đúng 4 tuần.",
+    ph: "Sai 1: … → đúng là: …\nSai 2: …\nSai 3: …", hint: "Mẹo: có 1 câu ĐÚNG để bẫy bạn đấy!",
     crit: [{ k: "phat_hien", label: "Tìm đúng lỗi", max: 60 }, { k: "sua_dung", label: "Sửa đúng", max: 30 }, { k: "ro_rang", label: "Rõ ràng", max: 10 }],
-    guide: "Chấm một CÂU TRẢ LỜI bắt lỗi (không phải prompt). Đáp án 3 lỗi: (1) giá chung GIẢM → phải là TĂNG liên tục; (2) lạm phát 2023 khoảng 15% → thực tế khoảng 3,25% (dưới 4%); (3) Kinh tế VI MÔ → phải là VĨ MÔ. Câu “Ngân hàng Nhà nước có thể tăng lãi suất” là ĐÚNG — ai đánh dấu câu này là lỗi thì trừ 10 điểm phat_hien. phat_hien: 20 điểm/lỗi tìm đúng. sua_dung: 10 điểm/lỗi sửa đúng (số liệu chỉ cần nói đúng khoảng ~3–4%). ro_rang: trình bày gọn, dễ đọc.",
-    kw: ["tăng", "3", "vĩ mô", "giảm", "15", "vi mô", "sai", "sửa"],
-    lesson: "AI có thể “ảo giác”: nói sai rất tự tin, kể cả số liệu. Luôn kiểm chứng khái niệm và con số với nguồn tin cậy (giáo trình, GSO, báo chính thống) trước khi dùng." },
-  { skill: "Hỏi tiếp để AI trả lời tốt hơn", title: "Hỏi tiếp", time: 75,
-    task: "Câu trả lời dưới đây đúng nhưng khô và chung chung. Viết MỘT câu hỏi tiếp để AI giải thích lại hay hơn, dễ hiểu hơn cho chính bạn.",
-    ctxLabel: "Bạn hỏi “Cung cầu là gì?”, AI trả lời:",
-    ctx: "Cung là lượng hàng hoá người bán muốn bán. Cầu là lượng hàng hoá người mua muốn mua. Giá cả được quyết định bởi cung và cầu.",
-    ph: "Câu hỏi tiếp của bạn…", hint: "Mẹo: xin ví dụ đời thật, so sánh, bảng, tình huống “nếu… thì…”",
+    guide: "Chấm một CÂU TRẢ LỜI bắt lỗi (không phải prompt). Đáp án 3 lỗi: (1) NEU ở TP. Hồ Chí Minh → thực tế ở HÀ NỘI; (2) thành lập năm 2020 → thực tế năm 1956; (3) mỗi tháng luôn đúng 4 tuần → sai, tháng có 28–31 ngày, tức hơn 4 tuần (trừ tháng 2 năm thường). Câu “Trường nằm trên phố Giải Phóng” là ĐÚNG (207 Giải Phóng) — ai đánh dấu câu này là lỗi thì trừ 10 điểm phat_hien. phat_hien: 20 điểm/lỗi tìm đúng. sua_dung: 10 điểm/lỗi sửa đúng (năm thành lập chấp nhận 1956; lỗi tuần chỉ cần nói tháng có 28–31 ngày/không phải lúc nào cũng 4 tuần). ro_rang: trình bày gọn, dễ đọc.",
+    kw: ["hà nội", "1956", "28", "30", "31", "ngày", "hồ chí minh", "2020", "4 tuần", "sai", "sửa"],
+    lesson: "AI có thể “chém gió”: nói sai rất tự tin, kể cả những điều tưởng hiển nhiên. Luôn kiểm tra lại tên, năm, con số với nguồn tin cậy (website chính thức, giáo trình) trước khi dùng." },
+  { skill: "Hỏi tiếp để AI trả lời tốt hơn", title: "🤖 AI nói như robot", time: 75,
+    task: "Câu trả lời của AI đúng nhưng nhạt như nước ốc. Viết MỘT câu hỏi tiếp để AI cho lời khuyên thật sự hợp với bạn!",
+    ctxLabel: "Bạn hỏi “Làm sao để dậy sớm?”, AI đáp:",
+    ctx: "Hãy đi ngủ sớm và đặt báo thức.",
+    ph: "Câu hỏi tiếp của bạn…", hint: "Mẹo: kể hoàn cảnh của bạn, xin kế hoạch cụ thể, mẹo thực tế",
     crit: [{ k: "cu_the", label: "Cụ thể", max: 40 }, { k: "dung_diem_yeu", label: "Đúng điểm yếu", max: 30 }, { k: "ca_nhan", label: "Gắn với bạn", max: 30 }],
-    guide: "Chấm MỘT câu hỏi tiếp (follow-up) gửi cho AI. Điểm yếu của câu trả lời gốc: không có ví dụ, không giải thích giá hình thành thế nào, không có tình huống thay đổi. cu_the: yêu cầu cụ thể (ví dụ đời thật, bảng, đồ thị, “nếu giá tăng thì…”). dung_diem_yeu: nhắm đúng chỗ thiếu của câu trả lời gốc. ca_nhan: gắn với bối cảnh người hỏi (sinh viên NEU, trà sữa, đi chợ, vé concert…). Nếu viết nhiều câu hỏi rời rạc thay vì một yêu cầu thì trừ nhẹ.",
-    kw: ["ví dụ", "nếu", "tại sao", "bảng", "đồ thị", "so sánh", "sinh viên", "giải thích", "dễ hiểu", "thực tế"],
-    lesson: "Câu trả lời đầu tiên chỉ là bản nháp. Người dùng AI giỏi là người biết hỏi tiếp: “cho ví dụ…”, “giải thích như cho người mới”, “nếu giá tăng thì sao?”, “làm thành bảng so sánh”." },
-  { skill: "Dùng AI làm gia sư", title: "AI gia sư", time: 75,
-    task: "Sắp thi giữa kỳ Kinh tế vi mô. Viết prompt để AI làm gia sư: kiểm tra bạn về Cung – Cầu bằng câu hỏi, KHÔNG đưa đáp án ngay.",
-    ph: "Viết prompt biến AI thành gia sư…", hint: "Mẹo: hỏi từng câu, chờ bạn trả lời, chỉ gợi ý khi sai",
-    crit: [{ k: "vai_gia_su", label: "Vai gia sư", max: 25 }, { k: "cach_hoi", label: "Cách hỏi", max: 35 }, { k: "giu_dap_an", label: "Giữ đáp án", max: 25 }, { k: "pham_vi", label: "Phạm vi", max: 15 }],
-    guide: "Chấm một PROMPT. vai_gia_su: giao vai gia sư/giảng viên. cach_hoi: hỏi từng câu một, chờ người học trả lời, tăng dần độ khó, có số câu/dạng câu. giu_dap_an: dặn không đưa đáp án ngay, chỉ gợi ý hoặc giải thích sau khi người học trả lời/sai. pham_vi: nêu rõ chủ đề Cung–Cầu, trình độ tân sinh viên, mục tiêu thi giữa kỳ. Prompt xin AI giải hộ/đưa đáp án thì điểm thấp.",
-    kw: ["gia sư", "giảng viên", "từng câu", "một câu", "chờ", "đừng", "không đưa", "gợi ý", "độ khó", "cung", "cầu", "giữa kỳ"],
-    lesson: "Dùng AI để HỌC, đừng để AI làm hộ. Mẫu vàng: “Hãy làm gia sư, hỏi tôi từng câu, chờ tôi trả lời, chỉ gợi ý khi tôi sai, cuối buổi tổng kết lỗ hổng kiến thức.”" },
-  { skill: "Bảo mật khi dùng AI", title: "AI an toàn", time: 75,
-    task: "Prompt dưới đây đang lộ thông tin nhạy cảm. Chỉ ra những thông tin KHÔNG nên đưa cho AI, rồi viết lại prompt an toàn mà AI vẫn giúp được.",
-    ctxLabel: "Prompt của bạn An:",
-    ctx: "Viết đơn xin học bổng giúp mình. Mình là Nguyễn Văn An, MSSV 11245678, CCCD 001205012345, SĐT 0912 345 678, mật khẩu cổng sinh viên là An@2007. Gia đình mình khó khăn, GPA 3.6, đang hoạt động CLB Tình nguyện.",
+    guide: "Chấm MỘT câu hỏi tiếp (follow-up) gửi cho AI. Điểm yếu của câu trả lời gốc: quá chung chung, không có kế hoạch, không tính đến thói quen/khó khăn của người hỏi. cu_the: yêu cầu cụ thể (kế hoạch theo giờ, 7 ngày, mẹo khi buồn ngủ, số bước). dung_diem_yeu: nhắm đúng chỗ thiếu (tại sao không dậy được, làm gì khi tắt báo thức rồi ngủ tiếp…). ca_nhan: nêu hoàn cảnh riêng (thức khuya lướt điện thoại, học sáng 7h, ở trọ, chơi game…). Nếu chỉ hỏi lại y câu cũ thì điểm rất thấp.",
+    kw: ["mình", "tôi", "hay thức", "điện thoại", "giờ", "kế hoạch", "cụ thể", "ví dụ", "tại sao", "7h", "mẹo"],
+    lesson: "Câu trả lời đầu tiên của AI thường chung chung. Hãy hỏi tiếp và kể hoàn cảnh của bạn: “mình hay thức đến 2h vì lướt điện thoại, lập kế hoạch 7 ngày giúp mình…” — AI sẽ trả lời đúng cho BẠN." },
+  { skill: "Dùng AI làm gia sư", title: "🎯 Đố vui cùng AI", time: 75,
+    task: "Sắp thi tiếng Anh! Viết prompt để AI đố bạn từ vựng: mỗi lần một câu, chờ bạn trả lời, KHÔNG lộ đáp án trước.",
+    ph: "Viết prompt biến AI thành người đố vui…", hint: "Mẹo: nói rõ chủ đề, số câu, đố từng câu, chờ trả lời",
+    crit: [{ k: "vai_gia_su", label: "Vai người đố", max: 25 }, { k: "cach_hoi", label: "Cách đố", max: 35 }, { k: "giu_dap_an", label: "Giữ đáp án", max: 25 }, { k: "pham_vi", label: "Chủ đề", max: 15 }],
+    guide: "Chấm một PROMPT. vai_gia_su: giao vai gia sư/giáo viên tiếng Anh/người dẫn đố vui. cach_hoi: đố từng câu một, chờ người học trả lời, có số câu, tăng dần độ khó, có thể cho điểm/khen. giu_dap_an: dặn không đưa đáp án trước, chỉ gợi ý hoặc giải thích sau khi người học trả lời. pham_vi: nêu chủ đề từ vựng (ví dụ du lịch, kinh tế, đời sống), trình độ, mục tiêu thi. Prompt chỉ xin AI liệt kê từ vựng kèm nghĩa thì điểm thấp.",
+    kw: ["gia sư", "giáo viên", "đố", "từng câu", "một câu", "chờ", "đừng", "không", "đáp án", "gợi ý", "từ vựng", "chủ đề"],
+    lesson: "Dùng AI để HỌC, đừng để AI làm hộ. Câu thần chú: “Hãy đố tôi từng câu, chờ tôi trả lời, chỉ gợi ý khi tôi sai, cuối cùng tổng kết những từ tôi hay nhầm.”" },
+  { skill: "Bảo mật khi dùng AI", title: "🔐 Lộ hết rồi!", time: 75,
+    task: "Bạn Bông nhờ AI viết tin nhắn xin nghỉ học nhưng… khai hết với AI. Chỉ ra những gì KHÔNG nên đưa, rồi viết lại prompt an toàn hơn!",
+    ctxLabel: "Prompt của bạn Bông:",
+    ctx: "Viết giúp mình tin nhắn xin cô cho nghỉ học hôm nay vì bị sốt. Mình là Trần Thị Bông, MSSV 11245678, mật khẩu Facebook là bong123, SĐT 0987 654 321, nhà ở số 5 ngõ 10 phố Giải Phóng.",
     ph: "Không nên đưa: …\nPrompt an toàn: …", hint: "Mẹo: thay thông tin thật bằng [Họ tên], [MSSV]…",
     crit: [{ k: "nhan_dien", label: "Nhận diện", max: 50 }, { k: "viet_lai", label: "Viết lại an toàn", max: 35 }, { k: "van_hieu_qua", label: "Vẫn hiệu quả", max: 15 }],
-    guide: "Chấm một câu trả lời gồm phần nhận diện + prompt viết lại. Thông tin nhạy cảm: MẬT KHẨU (nghiêm trọng nhất, bắt buộc phải nêu), CCCD (bắt buộc), SĐT, MSSV, họ tên đầy đủ. nhan_dien: mật khẩu 20, CCCD 15, SĐT/MSSV/họ tên tổng 15. viet_lai: prompt mới bỏ hoặc thay bằng [Họ tên], [MSSV]… và không còn thông tin thật nào. van_hieu_qua: vẫn giữ GPA, hoàn cảnh, hoạt động CLB để AI viết đơn tốt. Nếu prompt viết lại vẫn chứa mật khẩu hoặc CCCD thì viet_lai = 0.",
-    kw: ["mật khẩu", "cccd", "sđt", "số điện thoại", "mssv", "[", "họ tên", "gpa", "clb"],
-    lesson: "Không bao giờ dán mật khẩu, CCCD, số tài khoản, thông tin người khác vào AI. Thay bằng [Họ tên], [MSSV] — AI vẫn viết được, bạn tự điền sau." },
+    guide: "Chấm một câu trả lời gồm phần nhận diện + prompt viết lại. Thông tin nhạy cảm: MẬT KHẨU Facebook (nghiêm trọng nhất, bắt buộc phải nêu), địa chỉ nhà, SĐT, MSSV, họ tên đầy đủ. nhan_dien: mật khẩu 20, địa chỉ nhà 10, SĐT 10, MSSV/họ tên tổng 10. viet_lai: prompt mới bỏ hoặc thay bằng [Họ tên], [MSSV]… và không còn thông tin thật nào. van_hieu_qua: vẫn giữ lý do bị sốt, xin nghỉ hôm nay, gửi cô, để AI viết tin nhắn tốt. Nếu prompt viết lại vẫn chứa mật khẩu thì viet_lai = 0.",
+    kw: ["mật khẩu", "địa chỉ", "nhà", "sđt", "số điện thoại", "mssv", "[", "họ tên", "sốt", "nghỉ"],
+    lesson: "Không bao giờ dán mật khẩu, địa chỉ nhà, số tài khoản hay thông tin của người khác vào AI. Thay bằng [Họ tên], [MSSV] — AI vẫn viết được, bạn tự điền sau." },
 ];
 const critOf = r => (ROUNDS[r - 1] || ROUNDS[0]).crit;
 const MAXLEN = 700;
@@ -433,7 +433,7 @@ function buildHost() {
       </div></div>`;
   } else if (state.phase === "open" || state.phase === "closed") {
     body = `<div class="challenge"><div>
-        <div class="rlabel">Vòng ${r}/${ROUNDS.length} · Kỹ năng: ${esc(rd.skill)}</div>
+        <div class="rlabel">Vòng ${r}/${ROUNDS.length} · ${esc(rd.title)} <span style="color:var(--muted)">· Kỹ năng: ${esc(rd.skill)}</span></div>
         <div class="task${rd.ctx ? " sm" : ""}">${esc(rd.task)}</div>
         ${rd.ctx ? `<div class="aibox"><div class="albl">${esc(rd.ctxLabel)}</div>${esc(rd.ctx)}</div>` : ""}
         <div class="counter"><b id="subcnt">0</b> / <span class="cnt">0</span> bài đã nộp</div>
@@ -552,7 +552,7 @@ function renderPlayer() {
       <div class="pp">Bạn đã vào phòng. Nhìn lên màn hình — vòng thi sẽ bắt đầu ngay thôi.</div>
       <button class="btn ghost sm" style="width:auto" id="rename">Đổi tên</button></div>`;
   } else if (screen === "write") {
-    body = `<div class="prow"><span>Vòng ${r}/${ROUNDS.length} · ${esc(rd.skill)}</span><span class="ptimer" id="ptl"></span></div>
+    body = `<div class="prow"><span>Vòng ${r}/${ROUNDS.length} · ${esc(rd.title)}</span><span class="ptimer" id="ptl"></span></div>
       <div class="ptask">${esc(rd.task)}</div>
       ${rd.ctx ? `<div class="aibox p"><div class="albl">${esc(rd.ctxLabel)}</div>${esc(rd.ctx)}</div>` : ""}
       <textarea id="pr" maxlength="${MAXLEN}" placeholder="${esc(rd.ph)}"></textarea>
