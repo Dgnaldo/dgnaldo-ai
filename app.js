@@ -492,7 +492,7 @@ function buildHost() {
 function rowHtml(it, i, n) {
   const bars = critOf(results.round).map(c => `<i style="--w:${Math.round(100 * (it.parts?.[c.k] || 0) / c.max)}%" title="${c.label}"></i>`).join("");
   const delay = Math.max(0, Math.min(n, 8) - i) * 0.12;
-  return `<div class="row p${i + 1}" data-i="${i}" style="animation-delay:${delay}s"><div class="pos">${i < 3 ? placeMascot(i, 60, { sparks: false, crown: false }) : i + 1}</div>
+  return `<div class="row p${i + 1}" data-i="${i}" style="animation-delay:${delay}s"><div class="pos">${i < 3 && it.score >= 40 ? placeMascot(i, 60, { sparks: false, crown: false }) : i + 1}</div>
     <div><div class="nm">${esc(it.name)}</div><div class="cm">${esc(it.comment)}</div><div class="bars">${bars}</div></div><div class="sc">${it.score}</div></div>`;
 }
 function showPrompt(i) {
@@ -570,7 +570,7 @@ function renderPlayer() {
       <div class="pp">${me.sentRound === r ? "Bài của bạn đã được ghi nhận." : "Vòng này bạn chưa nộp bài."}</div></div>`;
   } else if (screen === "res") {
     if (!myRes || myRes.round !== r) body = `<div class="ph">Vòng ${r} <span class="serif">kết thúc</span></div><div class="pp">Bạn không có bài ở vòng này. Chuẩn bị cho vòng sau nhé!</div>`;
-    else { const tm = tierMascot(myRes.score, 130); body = `<div class="center" style="display:flex;flex-direction:column;align-items:center;gap:4px">${myRes.rank <= 3 ? placeMascot(myRes.rank - 1, 130) : tm.svg}<div class="tiermsg">${myRes.rank <= 3 ? ["Top 1 vòng này — Capybara Vàng!", "Top 2 — Heo Bạc ủn ỉn chúc mừng!", "Top 3 — Rùa Đồng chậm mà chắc!"][myRes.rank - 1] : tm.msg}</div></div><div class="scard">
+    else { const tm = tierMascot(myRes.score, 130); body = `<div class="center" style="display:flex;flex-direction:column;align-items:center;gap:4px">${myRes.rank <= 3 && myRes.score >= 40 ? placeMascot(myRes.rank - 1, 130) : tm.svg}<div class="tiermsg">${myRes.rank <= 3 && myRes.score >= 40 ? ["Top 1 vòng này — Capybara Vàng!", "Top 2 — Heo Bạc ủn ỉn chúc mừng!", "Top 3 — Rùa Đồng chậm mà chắc!"][myRes.rank - 1] : tm.msg}</div></div><div class="scard">
         <div class="pp">Vòng ${r} · Hạng <b>${myRes.rank}</b>/${myRes.of}</div>
         <div class="big">${myRes.score}<span style="font-size:24px;color:#6b7280">/100</span></div>
         <div style="font-size:17px;line-height:1.45">“${esc(myRes.comment)}”</div>
