@@ -153,6 +153,15 @@ textarea{min-height:190px;resize:vertical;line-height:1.5}
 .btn.big{padding:20px 46px;font-size:22px}
 .lobbyside .controls{margin-top:auto;padding-top:26px}
 @media (max-width:900px){.lobby{grid-template-columns:1fr}}
+.task.sm{font-size:clamp(24px,2.5vw,38px)}
+.aibox{margin-top:18px;background:var(--ink2);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:16px;padding:18px 22px;font-size:clamp(18px,1.6vw,24px);line-height:1.5;color:#dfe4ec;max-width:900px}
+.aibox .albl{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent2);margin-bottom:8px;font-weight:600}
+.aibox.p{margin-top:0;font-size:15px;padding:14px 16px}
+.lesson{background:linear-gradient(135deg,rgba(217,119,87,.18),rgba(217,119,87,.05));border:1px solid rgba(217,119,87,.45);border-radius:16px;padding:16px 18px;font-size:16px;line-height:1.5;color:var(--cream)}
+.lesson .lt{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent2);font-weight:700;margin-bottom:6px}
+.lesson.p{font-size:15px}
+.skills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:6px 0 18px}
+.skills span{background:var(--ink2);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:15px;color:var(--cream)}
 </style>
 </head>
 <body>
@@ -160,6 +169,6 @@ textarea{min-height:190px;resize:vertical;line-height:1.5}
 <canvas id="fx"></canvas>
 <script src="qrcode.min.js"></script>
 <script src="mqtt.min.js"></script>
-<script src="app.js?v=6"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>
