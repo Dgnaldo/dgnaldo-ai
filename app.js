@@ -189,7 +189,7 @@ function tick() {
   if (state.phase !== "open") return;
   const left = Math.max(0, Math.ceil((state.endsAt - Date.now()) / 1000));
   const el = $("#tleft"); if (el) el.textContent = left;
-  const arc = $("#arc"); if (arc) arc.style.strokeDashoffset = String(880 * (1 - left / ROUNDS[state.round - 1].time));
+  const arc = $("#arc"); if (arc) { arc.style.strokeDashoffset = String(880 * (1 - left / ROUNDS[state.round - 1].time)); arc.closest(".ring").classList.toggle("urgent", left <= 10); }
   // auto-lock: when time runs out, or ~2s after every player in the room has submitted
   const ids = Object.keys(players), got = allSubs(state.round);
   const allIn = ids.length > 0 && ids.every(id => got[id] && got[id].prompt && got[id].prompt.trim());
@@ -426,6 +426,7 @@ function buildHost() {
       <div class="lobbyside">
         <div class="h1" style="font-size:clamp(48px,5.5vw,84px)">Dgnaldo <span class="serif">AI</span></div>
         <p class="lead" style="margin-top:10px">5 vòng · 5 kỹ năng AI · Claude chấm điểm</p>
+        <div class="crew">${crew(130)}</div>
         <div class="pcount"><b class="cnt">0</b><span>người chơi</span></div>
         <div class="tiles" id="chips"></div>
         <div class="controls"><button class="btn acc big" id="startbtn" onclick="startRound(1)" disabled>Bắt đầu →</button></div>
@@ -444,11 +445,12 @@ function buildHost() {
              <button class="btn ghost sm" onclick="gradeAuto()">⚡ Chấm nhanh tự động</button>
              <button class="btn ghost sm" onclick="startRound(${r})">Mở lại vòng này</button>`}</div></div>
       <div class="ring"><svg width="100%" height="100%" viewBox="0 0 300 300"><circle cx="150" cy="150" r="140" stroke="#2a3344" stroke-width="10" fill="none"/>
-        <circle id="arc" cx="150" cy="150" r="140" stroke="var(--accent)" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="880" stroke-dashoffset="${state.phase === "closed" ? 880 : 0}" style="transition:stroke-dashoffset .3s linear"/></svg>
+        <defs><linearGradient id="arcg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f2c94c"/><stop offset="1" stop-color="#d97757"/></linearGradient></defs><circle id="arc" cx="150" cy="150" r="140" stroke="url(#arcg)" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="880" stroke-dashoffset="${state.phase === "closed" ? 880 : 0}" style="transition:stroke-dashoffset .3s linear"/></svg>
         <div class="num"><b id="tleft">${state.phase === "closed" ? "0" : rd.time}</b><span>${state.phase === "closed" ? "Hết giờ!" : "giây"}</span></div></div></div>`;
   } else if (state.phase === "grading") {
-    body = `<div class="grading"><div class="spark">${SPARK}</div>
-      <div class="h1" style="font-size:64px">Claude đang <span class="serif">chấm điểm</span></div>
+    body = `<div class="grading"><div class="crew">${crew(190, "grading")}</div>
+      <div class="claudetag"><span class="spark">${SPARK}</span>Claude & hội giám khảo Capy · Heo · Rùa</div>
+      <div class="h1" style="font-size:64px">Đang <span class="serif">chấm điểm</span><span class="dots"></span></div>
       <div class="gradelog"><b id="gn">${entriesFor(r).length}</b> bài · vòng ${r} · <span id="gt">0</span> giây</div>
       <div class="controls" id="gfb" style="justify-content:center;visibility:hidden">
         <button class="btn ghost sm" onclick="gradeAuto()">⚡ Chấm nhanh tự động</button>
@@ -459,7 +461,7 @@ function buildHost() {
     body = `<div class="results"><div>
         <div class="rlabel">Kết quả vòng ${r} · ${esc(rd.title)} ${results.source === "claude" ? "· chấm bởi Claude ✳" : "· chấm tự động"}</div>
         <div class="rank" style="margin-top:16px">${items.map((it, i) => rowHtml(it, i, items.length)).join("") || `<div class="pp">Không có bài nào.</div>`}</div></div>
-      <div class="side"><div class="lesson"><div class="lt">💡 Bài học · ${esc(rd.skill)}</div>${esc(rd.lesson)}</div>
+      <div class="side"><div class="lesson">${mascot("capy", { size: 64, glasses: true, cls: "think" })}<div><div class="lt">💡 Bài học · ${esc(rd.skill)}</div>${esc(rd.lesson)}</div></div>
         <h3 style="margin-top:18px">Tiêu chí chấm</h3>
         <div class="legend">${rd.crit.map(c => `<div><b>${c.label}</b> /${c.max}</div>`).join("")}</div>
         <div class="controls" style="margin-top:20px">
@@ -470,9 +472,9 @@ function buildHost() {
         <div class="controls"><button class="btn ghost sm" onclick="setState({phase:'closed'})">↺ Chấm lại vòng này</button></div></div></div>`;
   } else if (state.phase === "final") {
     const fb = boardSorted(); const [g, s, b] = fb;
-    const pod = (p, cls, n) => p ? `<div class="pod ${cls}"><div class="who">${esc(p.name)}</div><div class="pts">${p.total} điểm</div><div class="blk">${n}</div></div>` : `<div class="pod ${cls}" style="visibility:hidden"></div>`;
+    const pod = (p, cls, n) => p ? `<div class="pod ${cls}">${placeMascot(n - 1, n === 1 ? 170 : 140)}<div class="title">${PLACE[n - 1].name}</div><div class="who">${esc(p.name)}</div><div class="pts">${p.total} điểm</div><div class="blk">${n}</div></div>` : `<div class="pod ${cls}" style="visibility:hidden"></div>`;
     body = `<div style="text-align:center"><div class="rlabel">Chung cuộc</div>
-      <div class="h1" style="font-size:72px;margin-top:8px">Dgnaldo <span class="serif">Champions</span></div>
+      <div class="h1" style="font-size:64px;margin-top:6px">Dgnaldo <span class="serif">Champions</span></div>
       <div class="podium">${pod(s, "s", 2)}${pod(g, "g", 1)}${pod(b, "b", 3)}</div>
       <div class="skills">${ROUNDS.map((x, i) => `<span>✓ ${i + 1}. ${esc(x.skill)}</span>`).join("")}</div>
       <div class="chips" style="justify-content:center">${fb.slice(3).map((p, i) => `<span class="chip">#${i + 4} ${esc(p.name)} · ${p.total}</span>`).join("")}</div>
@@ -490,7 +492,7 @@ function buildHost() {
 function rowHtml(it, i, n) {
   const bars = critOf(results.round).map(c => `<i style="--w:${Math.round(100 * (it.parts?.[c.k] || 0) / c.max)}%" title="${c.label}"></i>`).join("");
   const delay = Math.max(0, Math.min(n, 8) - i) * 0.12;
-  return `<div class="row p${i + 1}" data-i="${i}" style="animation-delay:${delay}s"><div class="pos">${i + 1}</div>
+  return `<div class="row p${i + 1}" data-i="${i}" style="animation-delay:${delay}s"><div class="pos">${i < 3 ? placeMascot(i, 60, { sparks: false, crown: false }) : i + 1}</div>
     <div><div class="nm">${esc(it.name)}</div><div class="cm">${esc(it.comment)}</div><div class="bars">${bars}</div></div><div class="sc">${it.score}</div></div>`;
 }
 function showPrompt(i) {
@@ -538,15 +540,16 @@ function renderPlayer() {
   const rd = ROUNDS[r - 1];
   let body = "";
   if (screen === "name") {
-    body = `<div class="ph">Dgnaldo <span class="serif">AI</span></div>
+    body = `<div class="crew" style="margin:0">${crew(92)}</div>
+      <div class="ph">Dgnaldo <span class="serif">AI</span></div>
       <div class="pp">Nhập tên hiển thị của bạn trên màn hình lớn.</div>
       <input class="txt" id="nm" maxlength="24" placeholder="Tên của bạn" autocomplete="off" value="${esc(me.name)}">
       <button class="btn acc" id="go" ${connected && state.sid ? "" : "disabled"}>${connected && state.sid ? "Vào phòng" : "Đang kết nối…"}</button>`;
   } else if (screen === "lobby") {
     body = `<div class="center" style="display:flex;flex-direction:column;gap:16px">
       <div class="ph">Chào <span class="serif">${esc(me.name)}</span>!</div>
+      <div class="crew" style="justify-content:center">${crew(96)}</div>
       <div class="pp">Bạn đã vào phòng. Nhìn lên màn hình — vòng thi sẽ bắt đầu ngay thôi.</div>
-      <div class="wait-dots"><span></span><span></span><span></span></div>
       <button class="btn ghost sm" style="width:auto" id="rename">Đổi tên</button></div>`;
   } else if (screen === "write") {
     body = `<div class="prow"><span>Vòng ${r}/${ROUNDS.length} · ${esc(rd.skill)}</span><span class="ptimer" id="ptl"></span></div>
@@ -557,30 +560,32 @@ function renderPlayer() {
       <button class="btn acc" id="send">Nộp bài</button>`;
   } else if (screen === "sent") {
     body = `<div class="center" style="display:flex;flex-direction:column;gap:16px">
-      <div class="big">✓</div><div class="ph">Đã <span class="serif">nộp bài</span></div>
+      ${mascot("pig", { size: 150, bow: true, cls: "jump", sparks: true })}<div class="ph">Đã <span class="serif">nộp bài</span> ✓</div>
       <div class="pp">Bạn vẫn có thể sửa trước khi hết giờ. Còn <span class="ptimer" id="ptl"></span></div>
       <button class="btn ghost" id="edit">Sửa bài</button></div>`;
   } else if (screen === "wait") {
     body = `<div class="center" style="display:flex;flex-direction:column;gap:18px">
-      <div class="spark" style="width:80px;height:80px;color:var(--accent);animation:spin 2.6s linear infinite">${SPARK}</div>
+      <div class="crew" style="justify-content:center">${state.phase === "grading" ? crew(100, "grading") : mascot("turtle", { size: 140, cls: "walk" })}</div>
       <div class="ph">${state.phase === "grading" ? 'Claude đang <span class="serif">chấm</span>…' : 'Đã <span class="serif">khoá bài</span>'}</div>
       <div class="pp">${me.sentRound === r ? "Bài của bạn đã được ghi nhận." : "Vòng này bạn chưa nộp bài."}</div></div>`;
   } else if (screen === "res") {
     if (!myRes || myRes.round !== r) body = `<div class="ph">Vòng ${r} <span class="serif">kết thúc</span></div><div class="pp">Bạn không có bài ở vòng này. Chuẩn bị cho vòng sau nhé!</div>`;
-    else body = `<div class="scard">
+    else { const tm = tierMascot(myRes.score, 130); body = `<div class="center" style="display:flex;flex-direction:column;align-items:center;gap:4px">${myRes.rank <= 3 ? placeMascot(myRes.rank - 1, 130) : tm.svg}<div class="tiermsg">${myRes.rank <= 3 ? ["Top 1 vòng này — Capybara Vàng!", "Top 2 — Heo Bạc ủn ỉn chúc mừng!", "Top 3 — Rùa Đồng chậm mà chắc!"][myRes.rank - 1] : tm.msg}</div></div><div class="scard">
         <div class="pp">Vòng ${r} · Hạng <b>${myRes.rank}</b>/${myRes.of}</div>
         <div class="big">${myRes.score}<span style="font-size:24px;color:#6b7280">/100</span></div>
         <div style="font-size:17px;line-height:1.45">“${esc(myRes.comment)}”</div>
         <div class="parts">${critOf(r).map(c => `<div><b>${myRes.parts?.[c.k] ?? 0}<span style="font-size:12px;color:#6b7280">/${c.max}</span></b>${c.label}</div>`).join("")}</div></div>
-      <div class="pp center">Tổng điểm: <b style="color:var(--cream)">${myRes.total}</b> · Hạng chung #${myRes.overall}/${myRes.players}</div>`;
-    body += `<div class="lesson p"><div class="lt">💡 Bài học · ${esc(rd.skill)}</div>${esc(rd.lesson)}</div>`;
+      <div class="pp center">Tổng điểm: <b style="color:var(--cream)">${myRes.total}</b> · Hạng chung #${myRes.overall}/${myRes.players}</div>`; }
+    body += `<div class="lesson p">${mascot("capy", { size: 52, glasses: true, cls: "think" })}<div><div class="lt">💡 Bài học · ${esc(rd.skill)}</div>${esc(rd.lesson)}</div></div>`;
   } else if (screen === "final") {
     const i = myRes ? myRes.overall - 1 : -1;
     body = `<div class="center" style="display:flex;flex-direction:column;gap:14px"><div class="pp">Chung cuộc</div>
-      <div class="big">${i >= 0 ? "#" + (i + 1) : "—"}</div>
+      <div style="display:flex;justify-content:center">${i >= 0 && i < 3 ? placeMascot(i, 170) : mascot("turtle", { size: 150, cls: "walk" })}</div>
+      ${i >= 0 && i < 3 ? `<div class="pp" style="letter-spacing:.14em;text-transform:uppercase;font-weight:700">${PLACE[i].name}</div>` : ""}
+      ${i >= 0 ? `<div class="big">#${i + 1}</div>` : ""}
       <div class="ph">${i === 0 ? "Vô địch <span class='serif'>Dgnaldo!</span> 🏆" : i > 0 && i < 3 ? "Lên <span class='serif'>bục</span>! 🎉" : "Cảm ơn bạn đã <span class='serif'>chơi</span>!"}</div>
       ${i >= 0 ? `<div class="pp">${myRes.total} điểm</div>` : ""}
-      <div class="lesson p" style="text-align:left"><div class="lt">Hôm nay bạn đã luyện</div>${ROUNDS.map((x, k) => `✓ ${k + 1}. ${esc(x.skill)}`).join("<br>")}</div></div>`;
+      <div class="lesson p" style="text-align:left"><div><div class="lt">Hôm nay bạn đã luyện</div>${ROUNDS.map((x, k) => `✓ ${k + 1}. ${esc(x.skill)}`).join("<br>")}</div></div></div>`;
     if (i >= 0 && i < 3) setTimeout(() => burst(160), 300);
   }
   $("#app").innerHTML = `<div class="ply"><div class="top"><div class="brand"><div class="hex"></div>DGNALDO AI</div>${connPill()}</div><div class="pbody">${body}</div></div>`;
